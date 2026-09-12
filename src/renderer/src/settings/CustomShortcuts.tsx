@@ -103,6 +103,12 @@ export function CustomShortcuts() {
             disabled={!dashscopeApiKey}
           />
           <Shortcut
+            label="提交语音"
+            description="将已转录的语音文本提交给 AI（新开对话）"
+            shortcut="submitTranscription"
+            disabled={!dashscopeApiKey}
+          />
+          <Shortcut
             label="清除转录文本"
             description="清除已转录的文本（不会提交给AI）"
             shortcut="clearTranscription"

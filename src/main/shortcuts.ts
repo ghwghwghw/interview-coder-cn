@@ -380,6 +380,107 @@ const callbacks: Record<string, () => void> = {
     }
   },
 
+  // Submit the accumulated transcription as a new text-only conversation.
+  submitTranscription: async () => {
+    const mainWindow = global.mainWindow
+    if (!mainWindow || mainWindow.isDestroyed() || !state.inCoderPage || !settings.apiKey) return
+
+    const transcriptionText = getTranscriptionText().trim()
+    if (!transcriptionText) return
+
+    abortCurrentStream('new-request')
+    clearTranscriptionText()
+    mainWindow.webContents.send('transcription-cleared')
+
+    conversationMessages = [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: transcriptionText
+          }
+        ]
+      }
+    ]
+    recentScreenshots = []
+    hasAppendSeparator = false
+
+    const streamContext: StreamContext = {
+      controller: new AbortController(),
+      reason: null
+    }
+    currentStreamContext = streamContext
+
+    // Clear any screenshot-based answer before starting the text-only request.
+    mainWindow.webContents.send('solution-clear')
+    mainWindow.webContents.send('screenshots-updated', recentScreenshots)
+    mainWindow.webContents.send('ai-loading-start')
+
+    let endedNaturally = true
+    let streamStarted = false
+    let assistantResponse = ''
+    try {
+      const solutionStream = getSolutionStream(
+        conversationMessages,
+        streamContext.controller.signal
+      )
+      streamStarted = true
+      try {
+        for await (const chunk of solutionStream) {
+          if (streamContext.controller.signal.aborted) {
+            endedNaturally = false
+            break
+          }
+          assistantResponse += chunk
+          mainWindow.webContents.send('solution-chunk', chunk)
+        }
+      } catch (error) {
+        if (!streamContext.controller.signal.aborted) {
+          endedNaturally = false
+          console.error('Error streaming transcription solution:', error)
+          mainWindow.webContents.send('solution-error', extractErrorMessage(error))
+        } else {
+          endedNaturally = false
+        }
+      }
+
+      if (streamContext.controller.signal.aborted) {
+        if (streamContext.reason === 'user') {
+          mainWindow.webContents.send('solution-stopped')
+        }
+      } else if (endedNaturally) {
+        if (assistantResponse) {
+          conversationMessages.push({
+            role: 'assistant',
+            content: assistantResponse
+          })
+        }
+        mainWindow.webContents.send('solution-complete')
+      }
+    } catch (error) {
+      if (streamContext.controller.signal.aborted) {
+        if (streamContext.reason === 'user') {
+          mainWindow.webContents.send('solution-stopped')
+        }
+      } else {
+        endedNaturally = false
+        console.error('Error streaming transcription solution:', error)
+        mainWindow.webContents.send('solution-error', extractErrorMessage(error))
+      }
+    } finally {
+      if (currentStreamContext === streamContext) {
+        currentStreamContext = null
+      }
+      if (!streamStarted && streamContext.reason === 'user') {
+        mainWindow.webContents.send('solution-stopped')
+      }
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('ai-loading-end')
+      }
+    }
+  },
+
   // Append screenshot for continuous capture (if conversation exists)
   appendScreenshot: async () => {
     const mainWindow = global.mainWindow
@@ -595,6 +696,7 @@ const clickableActions = new Set([
   'moveMainWindowLeft',
   'moveMainWindowRight',
   'toggleTranscription',
+  'submitTranscription',
   'clearTranscription'
 ])
 

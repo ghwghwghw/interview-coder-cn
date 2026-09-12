@@ -3,20 +3,17 @@ import { Pointer, PointerOff, OctagonX, MessageCircle } from 'lucide-react'
 import { useSolutionStore } from '@/lib/store/solution'
 import { useShortcutsStore } from '@/lib/store/shortcuts'
 import { useAppStore } from '@/lib/store/app'
+import { useTranscriptionStore } from '@/lib/store/transcription'
 import ShortcutRenderer from '@/components/ShortcutRenderer'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogTitle, DialogContent, DialogFooter } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 
 export function AppStatusBar() {
-  const {
-    isLoading: isReceivingSolution,
-    setIsLoading,
-    screenshotData,
-    solutionChunks
-  } = useSolutionStore()
+  const { isLoading: isReceivingSolution, setIsLoading, solutionChunks } = useSolutionStore()
   const { ignoreMouse } = useAppStore()
   const { shortcuts } = useShortcutsStore()
+  const { transcriptionText } = useTranscriptionStore()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [questionInput, setQuestionInput] = useState('')
 
@@ -51,11 +48,22 @@ export function AppStatusBar() {
   }
 
   // Check if there's an active conversation
-  const hasActiveConversation = screenshotData && solutionChunks.length > 0
+  const hasActiveConversation = solutionChunks.length > 0
 
   return (
     <div className="absolute bottom-0 flex items-center justify-between w-full text-blue-100 bg-gray-600/10 px-4 pb-1">
       <div>
+        {!isReceivingSolution && transcriptionText && (
+          <div className="flex items-center space-x-2 pointer-events-none opacity-70 text-sm">
+            <span>
+              <ShortcutRenderer
+                shortcut={shortcuts.submitTranscription.key}
+                className="inline-block scale-75 text-xs border border-current bg-transparent py-0 px-1 ml-1"
+              />
+              提交语音
+            </span>
+          </div>
+        )}
         {isReceivingSolution ? (
           <div className="flex items-center space-x-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-r-2 border-[currentColor]"></div>

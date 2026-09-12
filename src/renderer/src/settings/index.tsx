@@ -12,9 +12,11 @@ import {
   FolderOpen,
   Mic,
   Plus,
+  RefreshCw,
   RotateCcw,
   X
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
@@ -55,6 +57,7 @@ export default function SettingsPage() {
     apiBaseURL,
     apiKey,
     model,
+    customModels,
     scenes,
     activeSceneId,
     screenshotAutoSave,
@@ -71,6 +74,7 @@ export default function SettingsPage() {
   } = useSettingsStore()
   const [showApiKey, setShowApiKey] = useState(false)
   const [showDashscopeApiKey, setShowDashscopeApiKey] = useState(false)
+  const [isLoadingModels, setIsLoadingModels] = useState(false)
   const [addSceneOpen, setAddSceneOpen] = useState(false)
   const [newSceneName, setNewSceneName] = useState('')
   const [sceneToDelete, setSceneToDelete] = useState<string | null>(null)
@@ -109,6 +113,21 @@ export default function SettingsPage() {
     addScene(name)
     setNewSceneName('')
     setAddSceneOpen(false)
+  }
+
+  const handleFetchModels = async () => {
+    setIsLoadingModels(true)
+    try {
+      const models = await window.api.getAvailableModels(apiBaseURL, apiKey)
+      updateSetting('customModels', [...new Set([...customModels, ...models])])
+      if (!model) updateSetting('model', models[0])
+      toast.success(`已拉取 ${models.length} 个模型`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '获取模型失败'
+      toast.error(message.replace(/^Error invoking remote method '[^']+': Error: /, ''))
+    } finally {
+      setIsLoadingModels(false)
+    }
   }
 
   const handleResetScenePrompt = () => {
@@ -184,7 +203,19 @@ export default function SettingsPage() {
                   这里列了几个流行的国内和国外模型，请自行确认你的平台是否支持
                 </span>
               </label>
-              <SelectModel value={model} onChange={(val) => updateSetting('model', val)} />
+              <div className="flex items-center gap-2">
+                <SelectModel value={model} onChange={(val) => updateSetting('model', val)} />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  title="从 API 拉取模型"
+                  aria-label="从 API 拉取模型"
+                  disabled={isLoadingModels || !apiBaseURL.trim() || !apiKey.trim()}
+                  onClick={handleFetchModels}
+                >
+                  <RefreshCw className={cn('h-4 w-4', isLoadingModels && 'animate-spin')} />
+                </Button>
+              </div>
             </div>
           </div>
         </div>

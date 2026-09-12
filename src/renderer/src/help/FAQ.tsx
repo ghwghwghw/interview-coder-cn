@@ -68,7 +68,9 @@ const faqs = [
         语音转录功能可以实时将面试官的语音或题目朗读转为文字，辅助 AI
         更好地理解题意。使用前需在「设置」中配置百炼平台 API Key，然后按下
         <ShortcutRenderer shortcut={`${platformAlt}+T`} className="text-xs mx-1" />
-        开始/暂停转录。转录文本会在截图时自动附带提交给 AI。
+        开始/暂停转录。转录文本会在截图时自动附带提交，也可以按下
+        <ShortcutRenderer shortcut="CommandOrControl+Y" className="text-xs mx-1" />
+        单独提交并新开一轮 AI 对话。
       </span>
     )
   },

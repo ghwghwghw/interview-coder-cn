@@ -37,7 +37,10 @@ export function SelectModel({
   const { customModels, updateSetting } = useSettingsStore()
 
   const models = useMemo(() => {
-    const customItems = customModels.map((m) => ({ value: m, label: m, isCustom: true }))
+    const defaultValues = new Set(defaultModels.map((model) => model.value))
+    const customItems = customModels
+      .filter((model) => !defaultValues.has(model))
+      .map((model) => ({ value: model, label: model, isCustom: true }))
     const defaultItems = defaultModels.map((m) => ({ ...m, isCustom: false }))
     return [...customItems, ...defaultItems]
   }, [customModels])

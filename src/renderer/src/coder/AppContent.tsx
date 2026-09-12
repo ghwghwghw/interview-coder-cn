@@ -8,6 +8,7 @@ const SCROLL_OFFSET = 120
 
 export function AppContent() {
   const {
+    isLoading,
     screenshotData,
     solutionChunks,
     errorMessage,
@@ -170,9 +171,9 @@ export function AppContent() {
             className="w-40 h-auto border border-gray-600 rounded-lg shadow-lg"
           />
         </div>
-      ) : (
+      ) : !isLoading && solutionChunks.length === 0 ? (
         <ShortcutTip />
-      )}
+      ) : null}
 
       {/* Solution Display */}
       <MarkdownRenderer>{solutionChunks.join('')}</MarkdownRenderer>

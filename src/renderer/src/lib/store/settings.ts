@@ -12,6 +12,8 @@ export interface PromptScene {
 }
 
 export const CODING_SCENE_ID = 'coding'
+const LEGACY_GATEWAY_HOST = 'ai-sub2api.pudu.work'
+const NEW_GATEWAY_BASE_URL = 'https://sub.geiliapi.com'
 
 /** Default prompts for all preset scenes, maintained as Markdown files under ./prompts */
 export const PRESET_SCENE_PROMPTS: Record<string, string> = {
@@ -175,11 +177,20 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: 'interview-coder-settings',
-      version: 8,
+      version: 9,
       migrate: (persisted, version) => {
         const state = persisted as Partial<Settings>
         // Drop the legacy codeLanguage field (language now lives in the prompt text)
         delete (state as Record<string, unknown>).codeLanguage
+        if (state.apiBaseURL) {
+          try {
+            if (new URL(state.apiBaseURL).hostname === LEGACY_GATEWAY_HOST) {
+              state.apiBaseURL = NEW_GATEWAY_BASE_URL
+            }
+          } catch {
+            // Ignore malformed legacy values and let the current settings win.
+          }
+        }
         if (version < 8) {
           // Hover-delay options are now 0.5s / 1s / 2s; snap the retired ones
           // so the Select still matches an item

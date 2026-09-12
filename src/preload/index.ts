@@ -10,6 +10,8 @@ const api = {
   // Update app settings
   updateAppSettings: (settings: Partial<AppSettings>) =>
     ipcRenderer.invoke('updateAppSettings', settings),
+  getAvailableModels: (apiBaseURL: string, apiKey: string) =>
+    ipcRenderer.invoke('getAvailableModels', apiBaseURL, apiKey) as Promise<string[]>,
 
   // Update app state
   updateAppState: (state: Partial<AppState>) => ipcRenderer.invoke('updateAppState', state),
@@ -49,6 +51,7 @@ const api = {
       | 'moveMainWindowLeft'
       | 'moveMainWindowRight'
       | 'toggleTranscription'
+      | 'submitTranscription'
       | 'clearTranscription'
   ) => ipcRenderer.invoke('triggerAction', action),
   setToolbarVisible: (visible: boolean) => ipcRenderer.invoke('setToolbarVisible', visible),
