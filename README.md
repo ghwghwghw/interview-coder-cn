@@ -15,12 +15,12 @@
 | 语音文本独立提交 | 转录文字随截图一起发送给 AI | 新增「提交语音」快捷键，无需截图即可发送累积的转录文字，开启一轮纯文本对话；Windows/Linux 默认为 `Ctrl+Y`，macOS 默认为 `⌘Y`，可在设置中修改 |
 | 纯文本对话追问 | 追问入口要求已有截图和回答 | 语音文本生成回答后也可以继续追问；生成过程中或已有回答时，无截图页面不再显示初始截图提示 |
 | 从 API 拉取模型 | 通过预置列表或手动输入选择模型 | 设置页新增「从 API 拉取模型」按钮，使用当前 API 地址和密钥请求 `/models`；返回的模型会去重并合入自定义列表，保留已有模型选择 |
-| 特定网关接口适配 | 统一使用 Chat Completions 接口 | 对 `ai-sub2api.pudu.work` 和 `sub.geiliapi.com` 使用 Responses 接口，其余地址继续使用 Chat Completions；旧版保存的前一个网关地址会在设置升级时迁移到 `https://sub.geiliapi.com` |
+| 网关接口兼容 | 统一使用 Chat Completions 接口 | 为预设兼容网关适配 Responses 接口，其他服务使用 Chat Completions；升级时自动迁移相关历史配置 |
 | 流式错误提示 | 使用文本流读取回答 | 读取流中的错误事件并反馈到界面；请求结束却没有文本内容时，提示「模型未返回文本内容」 |
 
 使用语音文本独立提交前，需要在设置中配置 AI API Key 和 DashScope API Key，启动转录并累积文字。提交后会清空已提交的转录文字、上一轮回答和截图，使用当前场景提示词生成新回答。
 
-拉取模型需要服务商提供兼容的 `/models` 接口；模型出现在列表中不代表其支持图片输入或一定能够生成回答。Responses 适配范围为上表列出的两个网关域名。
+拉取模型需要服务商提供兼容的 `/models` 接口；模型出现在列表中不代表其支持图片输入或一定能够生成回答。Responses 适配仅针对程序预设的兼容网关。
 
 本仓库同步维护于 [GitHub](https://github.com/ghwghwghw/interview-coder-cn) 和 [Gitee](https://gitee.com/chelly731/interview-coder-cn)。
 
