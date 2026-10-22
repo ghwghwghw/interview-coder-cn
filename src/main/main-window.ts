@@ -24,6 +24,8 @@ export function createWindow(): void {
     transparent: true,
     hasShadow: false,
     alwaysOnTop: true,
+    // Use a native tool window on Windows while keeping the overlay visible and interactive.
+    ...(process.platform === 'win32' ? { type: 'toolbar' } : {}),
     skipTaskbar: true,
     hiddenInMissionControl: true,
     show: false,

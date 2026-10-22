@@ -1,7 +1,7 @@
 {
   "name": "interview-coder-cn",
   "version": "1.8.0",
-  "description": "截屏解题助手，实时截屏并生成解题思路和答案",
+  "description": "wiki浏览器",
   "main": "./out/main/index.js",
   "devEngines": {
     "packageManager": {

@@ -28,6 +28,7 @@ export function createToolbarWindow(parent: BrowserWindow): void {
     // Clicking a button must never pull focus away from what the user is doing
     focusable: false,
     alwaysOnTop: true,
+    ...(process.platform === 'win32' ? { type: 'toolbar' } : {}),
     skipTaskbar: true,
     show: false,
     parent,
